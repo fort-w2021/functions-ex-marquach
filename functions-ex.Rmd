@@ -8,41 +8,75 @@ a)  Schreiben Sie die folgenden verwirrenden Funktionsaufrufe so um dass sie mö
 
 ```{r, 1a, eval=FALSE}
 set.seed(20141012)
-x <- sample(replace = TRUE, 20, x = c(1:10, NA))
-y <- runif(min = 0, max = 1, 20)
-cor(m = "k", y = y, u = "p", x = x)
+# Generate x, which is a vector of size 20 where we sample with replacement. (Comment not necessary, but i used for the structure of the function)
+x <- sample(size =  20, x =  c(1:10, NA), replace = TRUE)
+# Generate y, also size 20, which are pseudo-random numbers from standarduniform distribution.
+y <- runif(n = 20, min = 0, max = 1)
+# Calcuate the Kendall correlation between pairwaise complete observations.
+cor(x = x, y = y, method = "kendall", use =  "pairwise.complete.obs")
 ```
 
 b)  Was gibt diese Funktion zurück? Warum? Welches Prinzip illustriert sie?
 
 ```{r, 1b, eval=FALSE}
-f1 <- function(x = {
-    y <- 1
-    2
+y <- 5
+f1 <- function(x =  {
+  y <- 1  
+  2
   }, y = 0) {
-  x + y
+  c(y, x, y, y)
 }
 ```
-
+Innerhalb der ersten geschweiften Klammer wird der letzte Eintrag als x gewertet, somit also 2. Innerhalb der Funktion wird y als 0 definiert, somit wird beim ausfuehren von f1 mit der Zeilen `x+y` 2 rauskommen. Sollte ja somit auf dem execution environment beruhen bei dem argument matching durchgefuehrt wird.
 *Hinweis:* Was passiert wenn Sie die letzte Zeile mit `y + x` ersetzen? Mit `c(y, x, y)`?
+Wenn auf `c(y,x,y)` gewechselt wird, kommt 0,2,1. Hier wird dann wieder agrument matching abgearbeitet. Da y=0 schon benutzt wurde, greift R auf das andere y zu wechseln noch im execution environment zur Verfuegung steht. Deswegen gibt auch `c(y, x, y, y)` 0, 2, 1, 1 aus, obwohl ausserhalb ein `y<-5` definiert wurde. Es muss nicht in die naechste Ebene springen.
 
 c)  Was gibt diese Funktion zurück? Warum? Welches Prinzip illustriert sie?
 
 ```{r, 1c, eval=FALSE}
+  
 f2 <- function(x = z) {
   z <- 100
   x
 }
+
+  z <- 100
+f2_a<- function(x = z) {
+  x
+}
 ```
+
+Die Funktion gibt den Wert z zurueck, was in diesem Fall 100 ist. Warum: Weil hier dynamic lookup im Hintergrund benutzt wird. Innerhalb des function calls wurde z als 100 definiert und der Funktion ist z als default fuer x zugewiesen. Daher liefern f2_a und f2 das gleiche Ergebnis.
+
 
 d)  Schreiben sie eine *infix*-Funktion `%xor%` für `logical`-inputs die eine XOR-Operation (entweder-oder-aber-nicht-beides) durchführt. Überprüfen Sie ihre Funktion mit den folgenden Tests:
 
 ```{r, code = readLines("test-functions-xor.R"), eval=FALSE}
+# Inputs are logicalss. Example: a True and b True => %xor% false, because is in both
+# return also logicals
+`%xor%` <- function(a = TRUE, b = FALSE){
+  !unlist(purrr::map2(a, b, identical))
+}
 ```
 
 e)  Wie kann jeweils der Zustand von `options()` und `par()` abgespeichert und wiederhergestellt werden?
+```{r, Aufgabe e}
+default_par <- par(no.readonly = T)
+default_options <- options()
+par(default_par)
+options(default_options)
+```
 
 f)  Schreiben Sie eine Funktion die ein neues PDF-Grafikdevice öffnet, `plot` mit den übergebenen Argumenten aufruft und dann das zuvor geöffnete Grafikfenster wieder schließt, egal ob die übergebenen Argumente für `plot` funktioniert haben oder nicht.
+
+```{r}
+my_plot <- function(x, y, ...){
+  pdf(file = "myplot.pdf")
+  plot(x, y, ...)
+  dev.off()
+}
+```
+
 
 g)  Was gibt der folgende Code zurück? Warum? Was bedeuten die drei verschiedenen `c`s in der zweiten Zeile?
 
@@ -50,3 +84,8 @@ g)  Was gibt der folgende Code zurück? Warum? Was bedeuten die drei verschieden
 c <- 10
 c(c = c)
 ```
+
+R ist so schlau und erkennt wann es sich um eine Funktion handelt und wann um eine Variable (bsp.: VO n(n)). Selbes gilt hier natuerlich auch.
+Das erste c ist die Funktion combine. Das zweite c ist der Name des Vektors und das dritte c ist Zahl welche c vorher zugewiesen wurde.
+
+
