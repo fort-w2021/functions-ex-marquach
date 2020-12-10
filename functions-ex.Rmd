@@ -19,17 +19,21 @@ cor(x = x, y = y, method = "kendall", use =  "pairwise.complete.obs")
 b)  Was gibt diese Funktion zurück? Warum? Welches Prinzip illustriert sie?
 
 ```{r, 1b, eval=FALSE}
-y <- 5
 f1 <- function(x =  {
   y <- 1  
   2
   }, y = 0) {
-  c(y, x, y, y)
+  x+y
 }
+f1()
 ```
-Innerhalb der ersten geschweiften Klammer wird der letzte Eintrag als x gewertet, somit also 2. Innerhalb der Funktion wird y als 0 definiert, somit wird beim ausfuehren von f1 mit der Zeilen `x+y` 2 rauskommen. Sollte ja somit auf dem execution environment beruhen bei dem argument matching durchgefuehrt wird.
-*Hinweis:* Was passiert wenn Sie die letzte Zeile mit `y + x` ersetzen? Mit `c(y, x, y)`?
-Wenn auf `c(y,x,y)` gewechselt wird, kommt 0,2,1. Hier wird dann wieder agrument matching abgearbeitet. Da y=0 schon benutzt wurde, greift R auf das andere y zu wechseln noch im execution environment zur Verfuegung steht. Deswegen gibt auch `c(y, x, y, y)` 0, 2, 1, 1 aus, obwohl ausserhalb ein `y<-5` definiert wurde. Es muss nicht in die naechste Ebene springen.
+Beim ersten mal voll ueberlesen, dass einmal x+y und einmal y+x kommt :o  Neuer Versuch:
+Was passiert bei 'x+y':
+Ich denke mal es gut um Lexical scoping. Also es geht darum wie die Funktion beim Schreiben der Funktion genested wurde und nicht darum wie sie genested ist wenn sie ausgefuehrt werden. Daher ergibt `x+y` 3. das liegt daran, weil `x` zuerst genannt wird und wir uns somit nur in der ersten geschweiften Klammer befinden.
+*Hinweis:* Was passiert wenn Sie die letzte Zeile mit `y + x`?
+Ein Aendern der Reihenfolge fuerht dann dazu, dass wir uns default `y` mit `0` nehmen und unser default `x` mit `2`.
+*Hinweis:* Was passiert wenn Sie die letzte Zeile mit `c(y, x, y)`?
+Wenn auf `c(y,x,y)` gewechselt wird, kommt `c(0,2,1)`. Auch wird wird wieder das default `y` mit `0` genutzt und das default `x` mit `2` gewaehlt. Da erst nach `x`  einem weiteren `y` gefragt wurde, wird nun ein `y` von `1` ausgegeben. Bei einer anderen Reihenfolge, also `c(y,y,x,y)`, waere `c(0,0,2)` erschienen.
 
 c)  Was gibt diese Funktion zurück? Warum? Welches Prinzip illustriert sie?
 
@@ -40,13 +44,9 @@ f2 <- function(x = z) {
   x
 }
 
-  z <- 100
-f2_a<- function(x = z) {
-  x
-}
 ```
 
-Die Funktion gibt den Wert z zurueck, was in diesem Fall 100 ist. Warum: Weil hier dynamic lookup im Hintergrund benutzt wird. Innerhalb des function calls wurde z als 100 definiert und der Funktion ist z als default fuer x zugewiesen. Daher liefern f2_a und f2 das gleiche Ergebnis.
+
 
 
 d)  Schreiben sie eine *infix*-Funktion `%xor%` für `logical`-inputs die eine XOR-Operation (entweder-oder-aber-nicht-beides) durchführt. Überprüfen Sie ihre Funktion mit den folgenden Tests:
